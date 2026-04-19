@@ -72,9 +72,12 @@ class UsuarioSerializer(serializers.ModelSerializer):
 # ─── Reserva ─────────────────────────────────────────────────────────────────
 
 class ReservaSerializer(serializers.ModelSerializer):
+    # 1. Agregamos este campo de "solo lectura" que busca el título en el modelo Videojuego
+    videojuego_titulo = serializers.ReadOnlyField(source='videojuego.titulo')
+
     class Meta:
         model = Reserva
-        fields = '__all__'
+        fields = '__all__' # Esto ahora incluirá 'videojuego_titulo'
 
     def validate_cliente_cedula(self, value):
         return validar_cedula_ecuatoriana(value)
@@ -108,20 +111,23 @@ class ReservaSerializer(serializers.ModelSerializer):
 
 # ─── Venta ───────────────────────────────────────────────────────────────────
 
+# 1. Agregamos el título y precio al detalle
 class DetalleVentaSerializer(serializers.ModelSerializer):
+    videojuego_titulo = serializers.ReadOnlyField(source='videojuego.titulo')
+    
     class Meta:
         model = DetalleVenta
-        fields = ['videojuego', 'cantidad'] # Solo pedimos esto a Angular
+        fields = ['videojuego', 'videojuego_titulo', 'cantidad', 'precio_unitario']
 
+# 2. Agregamos el nombre del vendedor a la venta
 class VentaSerializer(serializers.ModelSerializer):
-    # many=True permite recibir un array de detalles. Quitamos el read_only=True para poder escribirlos
     detalles = DetalleVentaSerializer(many=True)
+    usuario_nombre = serializers.ReadOnlyField(source='usuario.username') # Para que no diga "Admin" siempre
 
     class Meta:
         model = Venta
-        fields = ['id', 'fecha_venta', 'total', 'codigo_reserva', 'cliente_nombre', 'cliente_cedula', 'usuario', 'detalles']
-        read_only_fields = ['total', 'fecha_venta'] # El total lo calcula el backend, no Angular
-
+        fields = ['id', 'fecha_venta', 'total', 'codigo_reserva', 'cliente_nombre', 'cliente_cedula', 'usuario', 'usuario_nombre', 'detalles']
+        read_only_fields = ['total', 'fecha_venta']
     def validate_cliente_cedula(self, value):
         return validar_cedula_ecuatoriana(value)
 
