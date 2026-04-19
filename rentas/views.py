@@ -5,6 +5,9 @@ from .serializers import (
     UsuarioSerializer, ReservaSerializer, VentaSerializer
 )
 from rest_framework.decorators import action
+from django.utils import timezone
+from datetime import timedelta
+import random
 
 class CategoriaViewSet(viewsets.ModelViewSet):
     queryset = Categoria.objects.all()

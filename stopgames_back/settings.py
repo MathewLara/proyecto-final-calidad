@@ -78,8 +78,12 @@ WSGI_APPLICATION = 'stopgames_back.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'stopgames_db',   # El nombre de tu base de datos en Postgres
+        'USER': 'postgres',       # Tu usuario (suele ser postgres)
+        'PASSWORD': '161825', # Pon tu contraseña de pgAdmin
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
