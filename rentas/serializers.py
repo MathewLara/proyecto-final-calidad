@@ -68,6 +68,33 @@ class UsuarioSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'rol', 'is_active', 'password']
         extra_kwargs = {'password': {'write_only': True}}
 
+    def create(self, validated_data):
+        # 1. Creamos el usuario con los datos que mandó Angular
+        user = Usuario(
+            username=validated_data['username'],
+            email=validated_data.get('email', ''),
+            rol=validated_data.get('rol', 'Vendedor')
+        )
+        
+        # 2. Usamos la herramienta nativa de Django para ENCRIPTAR la contraseña
+        user.set_password(validated_data['password']) 
+        
+        # 3. Guardamos en la base de datos
+        user.save()
+        return user
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get('username', instance.username)
+        instance.email = validated_data.get('email', instance.email)
+        instance.rol = validated_data.get('rol', instance.rol)
+        
+        # Si mandamos contraseña nueva, la encripta. Si no, la deja intacta.
+        password = validated_data.get('password')
+        if password:
+            instance.set_password(password)
+            
+        instance.save()
+        return instance
+
 
 # ─── Reserva ─────────────────────────────────────────────────────────────────
 

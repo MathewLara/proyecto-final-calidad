@@ -9,6 +9,7 @@ from .serializers import (
 from rest_framework.decorators import action
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models import Sum
 import random
 
 class CategoriaViewSet(viewsets.ModelViewSet):
@@ -50,6 +51,21 @@ class VideojuegoViewSet(viewsets.ModelViewSet):
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
+
+    # 1. INTERCEPTAMOS EL BOTÓN "DESACTIVAR" (Soft Delete)
+    def destroy(self, request, *args, **kwargs):
+        usuario = self.get_object()
+        usuario.is_active = False # Usamos is_active porque así lo pide el modelo de Django
+        usuario.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # 2. CREAMOS EL BOTÓN "REACTIVAR"
+    @action(detail=True, methods=['put'])
+    def activar(self, request, pk=None):
+        usuario = self.get_object()
+        usuario.is_active = True
+        usuario.save()
+        return Response({"mensaje": "Usuario reactivado con éxito."}, status=status.HTTP_200_OK)
 
 class ReservaViewSet(viewsets.ModelViewSet):
     queryset = Reserva.objects.all()
@@ -97,3 +113,20 @@ class ReservaViewSet(viewsets.ModelViewSet):
 class VentaViewSet(viewsets.ModelViewSet):
     queryset = Venta.objects.all()
     serializer_class = VentaSerializer
+
+    # AGREGAR ESTA FUNCIÓN AQUÍ:
+    @action(detail=False, methods=['get'])
+    def estadisticas(self, request):
+        hoy = timezone.now().date()
+        # Sumamos todos los totales de las ventas
+        total_ganancias = Venta.objects.aggregate(Sum('total'))['total__sum'] or 0
+        # Contamos cuántas ventas se hicieron hoy
+        ventas_hoy = Venta.objects.filter(fecha_venta__date=hoy).count()
+        # Buscamos juegos con stock crítico (menos de 5 unidades)
+        poco_stock = Videojuego.objects.filter(stock__lt=5, activo=True).values('titulo', 'stock')
+        
+        return Response({
+            "total_ganancias": total_ganancias,
+            "ventas_hoy": ventas_hoy,
+            "poco_stock": list(poco_stock)
+        })
