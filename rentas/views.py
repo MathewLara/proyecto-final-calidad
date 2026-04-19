@@ -10,6 +10,8 @@ from rest_framework.decorators import action
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Sum
+from django.utils.timezone import make_aware
+import datetime
 import random
 
 class CategoriaViewSet(viewsets.ModelViewSet):
@@ -113,20 +115,30 @@ class ReservaViewSet(viewsets.ModelViewSet):
 class VentaViewSet(viewsets.ModelViewSet):
     queryset = Venta.objects.all()
     serializer_class = VentaSerializer
+    
 
-    # AGREGAR ESTA FUNCIÓN AQUÍ:
     @action(detail=False, methods=['get'])
     def estadisticas(self, request):
-        hoy = timezone.now().date()
-        # Sumamos todos los totales de las ventas
-        total_ganancias = Venta.objects.aggregate(Sum('total'))['total__sum'] or 0
-        # Contamos cuántas ventas se hicieron hoy
-        ventas_hoy = Venta.objects.filter(fecha_venta__date=hoy).count()
-        # Buscamos juegos con stock crítico (menos de 5 unidades)
-        poco_stock = Videojuego.objects.filter(stock__lt=5, activo=True).values('titulo', 'stock')
-        
-        return Response({
-            "total_ganancias": total_ganancias,
-            "ventas_hoy": ventas_hoy,
-            "poco_stock": list(poco_stock)
-        })
+        try:
+            # 1. Obtenemos el inicio y fin del día actual de forma manual
+            hoy = timezone.now().date()
+            inicio_dia = make_aware(datetime.datetime.combine(hoy, datetime.time.min))
+            fin_dia = make_aware(datetime.datetime.combine(hoy, datetime.time.max))
+            
+            # 2. Sumamos el dinero (Histórico total)
+            total_ganancias = Venta.objects.aggregate(Sum('total'))['total__sum'] or 0
+            
+            # 3. Contamos ventas usando un rango (range), que es 100% compatible con SQLite
+            ventas_hoy = Venta.objects.filter(fecha_venta__range=(inicio_dia, fin_dia)).count()
+            
+            # 4. Stock bajo
+            poco_stock = Videojuego.objects.filter(stock__lt=5, activo=True).values('titulo', 'stock')
+            
+            return Response({
+                "total_ganancias": float(total_ganancias),
+                "ventas_hoy": ventas_hoy,
+                "poco_stock": list(poco_stock)
+            })
+        except Exception as e:
+            print(f"Error en stats: {e}")
+            return Response({"error": str(e)}, status=500)
