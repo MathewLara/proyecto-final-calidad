@@ -3,11 +3,657 @@
   <head>
     <meta charset="utf-8"/>
     <title id="head-title">informe_calidad.html</title>
-      <link href="assets\style.css" rel="stylesheet" type="text/css"/>
+      <style type="text/css">body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  vertical-align: top;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+#environment ul {
+  margin: 0;
+  padding: 0 20px;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+.col-links__extra {
+  margin-right: 3px;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.logwrapper {
+  max-height: 230px;
+  overflow-y: scroll;
+  background-color: #e6e6e6;
+}
+.logwrapper.expanded {
+  max-height: none;
+}
+.logwrapper.expanded .logexpander:after {
+  content: "collapse [-]";
+}
+.logwrapper .logexpander {
+  z-index: 1;
+  position: sticky;
+  top: 10px;
+  width: max-content;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 5px 7px;
+  margin: 10px 0 10px calc(100% - 80px);
+  cursor: pointer;
+  background-color: #e6e6e6;
+}
+.logwrapper .logexpander:after {
+  content: "expand [+]";
+}
+.logwrapper .logexpander:hover {
+  color: #000;
+  border-color: #000;
+}
+.logwrapper .log {
+  min-height: 40px;
+  position: relative;
+  top: -50px;
+  height: calc(100% + 50px);
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  padding: 5px;
+  padding-right: 80px;
+  white-space: pre-wrap;
+}
+
+div.media {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin: 0 5px;
+  overflow: hidden;
+  width: 320px;
+}
+
+.media-container {
+  display: grid;
+  grid-template-columns: 25px auto 25px;
+  align-items: center;
+  flex: 1 1;
+  overflow: hidden;
+  height: 200px;
+}
+
+.media-container--fullscreen {
+  grid-template-columns: 0px auto 0px;
+}
+
+.media-container__nav--right,
+.media-container__nav--left {
+  text-align: center;
+  cursor: pointer;
+}
+
+.media-container__viewport {
+  cursor: pointer;
+  text-align: center;
+  height: inherit;
+}
+.media-container__viewport img,
+.media-container__viewport video {
+  object-fit: cover;
+  width: 100%;
+  max-height: 100%;
+}
+
+.media__name,
+.media__counter {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex: 0 0 25px;
+  align-items: center;
+}
+
+.collapsible td:not(.col-links) {
+  cursor: pointer;
+}
+.collapsible td:not(.col-links):hover::after {
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.col-result {
+  width: 130px;
+}
+.col-result:hover::after {
+  content: " (hide details)";
+}
+
+.col-result.collapsed:hover::after {
+  content: " (show details)";
+}
+
+#environment-header h2:hover::after {
+  content: " (hide details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#environment-header.collapsed h2:hover::after {
+  content: " (show details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+.sortable.desc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: -12.5px;
+  border: 10px solid #4caf50;
+  border-bottom: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.sortable.asc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: 12.5px;
+  border: 10px solid #4caf50;
+  border-top: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.hidden, .summary__reload__button.hidden {
+  display: none;
+}
+
+.summary__data {
+  flex: 0 0 550px;
+}
+.summary__reload {
+  flex: 1 1;
+  display: flex;
+  justify-content: center;
+}
+.summary__reload__button {
+  flex: 0 0 300px;
+  display: flex;
+  color: white;
+  font-weight: bold;
+  background-color: #4caf50;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.summary__reload__button:hover {
+  background-color: #46a049;
+}
+.summary__spacer {
+  flex: 0 0 550px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.filters,
+.collapse {
+  display: flex;
+  align-items: center;
+}
+.filters button,
+.collapse button {
+  color: #999;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.filters button:hover,
+.collapse button:hover {
+  color: #ccc;
+}
+
+.filter__label {
+  margin-right: 10px;
+}
+
+/******************************
+ * CUSTOM CSS
+ * assets\style.css
+ ******************************/
+
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  vertical-align: top;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+#environment ul {
+  margin: 0;
+  padding: 0 20px;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+.col-links__extra {
+  margin-right: 3px;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.logwrapper {
+  max-height: 230px;
+  overflow-y: scroll;
+  background-color: #e6e6e6;
+}
+.logwrapper.expanded {
+  max-height: none;
+}
+.logwrapper.expanded .logexpander:after {
+  content: "collapse [-]";
+}
+.logwrapper .logexpander {
+  z-index: 1;
+  position: sticky;
+  top: 10px;
+  width: max-content;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 5px 7px;
+  margin: 10px 0 10px calc(100% - 80px);
+  cursor: pointer;
+  background-color: #e6e6e6;
+}
+.logwrapper .logexpander:after {
+  content: "expand [+]";
+}
+.logwrapper .logexpander:hover {
+  color: #000;
+  border-color: #000;
+}
+.logwrapper .log {
+  min-height: 40px;
+  position: relative;
+  top: -50px;
+  height: calc(100% + 50px);
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  padding: 5px;
+  padding-right: 80px;
+  white-space: pre-wrap;
+}
+
+div.media {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin: 0 5px;
+  overflow: hidden;
+  width: 320px;
+}
+
+.media-container {
+  display: grid;
+  grid-template-columns: 25px auto 25px;
+  align-items: center;
+  flex: 1 1;
+  overflow: hidden;
+  height: 200px;
+}
+
+.media-container--fullscreen {
+  grid-template-columns: 0px auto 0px;
+}
+
+.media-container__nav--right,
+.media-container__nav--left {
+  text-align: center;
+  cursor: pointer;
+}
+
+.media-container__viewport {
+  cursor: pointer;
+  text-align: center;
+  height: inherit;
+}
+.media-container__viewport img,
+.media-container__viewport video {
+  object-fit: cover;
+  width: 100%;
+  max-height: 100%;
+}
+
+.media__name,
+.media__counter {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex: 0 0 25px;
+  align-items: center;
+}
+
+.collapsible td:not(.col-links) {
+  cursor: pointer;
+}
+.collapsible td:not(.col-links):hover::after {
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.col-result {
+  width: 130px;
+}
+.col-result:hover::after {
+  content: " (hide details)";
+}
+
+.col-result.collapsed:hover::after {
+  content: " (show details)";
+}
+
+#environment-header h2:hover::after {
+  content: " (hide details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#environment-header.collapsed h2:hover::after {
+  content: " (show details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+.sortable.desc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: -12.5px;
+  border: 10px solid #4caf50;
+  border-bottom: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.sortable.asc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: 12.5px;
+  border: 10px solid #4caf50;
+  border-top: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.hidden, .summary__reload__button.hidden {
+  display: none;
+}
+
+.summary__data {
+  flex: 0 0 550px;
+}
+.summary__reload {
+  flex: 1 1;
+  display: flex;
+  justify-content: center;
+}
+.summary__reload__button {
+  flex: 0 0 300px;
+  display: flex;
+  color: white;
+  font-weight: bold;
+  background-color: #4caf50;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.summary__reload__button:hover {
+  background-color: #46a049;
+}
+.summary__spacer {
+  flex: 0 0 550px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.filters,
+.collapse {
+  display: flex;
+  align-items: center;
+}
+.filters button,
+.collapse button {
+  color: #999;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.filters button:hover,
+.collapse button:hover {
+  color: #ccc;
+}
+
+.filter__label {
+  margin-right: 10px;
+}
+
+      </style>
+    
   </head>
   <body>
     <h1 id="title">informe_calidad.html</h1>
-    <p>Report generated on 19-Apr-2026 at 03:02:05 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a>
+    <p>Report generated on 19-Apr-2026 at 19:09:45 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a>
         v4.2.0</p>
     <div id="environment-header">
       <h2>Environment</h2>
@@ -62,7 +708,7 @@
         <h2>Summary</h2>
         <div class="additional-summary prefix">
         </div>
-        <p class="run-count">12 tests took 00:00:06.</p>
+        <p class="run-count">20 tests took 00:00:03.</p>
         <p class="filter">(Un)check the boxes to filter the results.</p>
         <div class="summary__reload">
           <div class="summary__reload__button hidden" onclick="location.reload()">
@@ -72,10 +718,10 @@
         <div class="summary__spacer"></div>
         <div class="controls">
           <div class="filters">
-            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="failed" >
-            <span class="failed">10 Failed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="failed" disabled>
+            <span class="failed">0 Failed,</span>
             <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="passed" >
-            <span class="passed">2 Passed,</span>
+            <span class="passed">20 Passed,</span>
             <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="skipped" disabled>
             <span class="skipped">0 Skipped,</span>
             <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xfailed" disabled>
@@ -110,7 +756,7 @@
       </thead>
     </table>
   <footer>
-    <div id="data-container" data-jsonblob="{&#34;environment&#34;: {&#34;Python&#34;: &#34;3.13.7&#34;, &#34;Platform&#34;: &#34;Windows-11-10.0.26200-SP0&#34;, &#34;Packages&#34;: {&#34;pytest&#34;: &#34;9.0.3&#34;, &#34;pluggy&#34;: &#34;1.6.0&#34;}, &#34;Plugins&#34;: {&#34;django&#34;: &#34;4.12.0&#34;, &#34;html&#34;: &#34;4.2.0&#34;, &#34;metadata&#34;: &#34;3.1.1&#34;}}, &#34;tests&#34;: {&#34;rentas/tests.py::test_crear_categoria_exitosa&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_crear_categoria_exitosa&#34;, &#34;duration&#34;: &#34;00:00:03&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_crear_categoria_exitosa&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:03&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;@pytest.mark.django_db\n    def test_crear_categoria_exitosa():\n&amp;gt;       categoria = Categoria.objects.create(nombre=&amp;quot;RPG&amp;quot;, descripcion=&amp;quot;Juegos de rol&amp;quot;, activo=True)\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nrentas\\tests.py:11: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nvenv\\Lib\\site-packages\\django\\db\\models\\manager.py:87: in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\query.py:667: in create\n    obj = self.model(**kwargs)\n          ^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nself = &amp;lt;Categoria: RPG&amp;gt;, args = (), kwargs = {&amp;#x27;descripcion&amp;#x27;: &amp;#x27;Juegos de rol&amp;#x27;}, cls = &amp;lt;class &amp;#x27;rentas.models.Categoria&amp;#x27;&amp;gt;\nopts = &amp;lt;Options for Categoria&amp;gt;, _setattr = &amp;lt;built-in function setattr&amp;gt;, _DEFERRED = &amp;lt;Deferred field&amp;gt;\nfields_iter = &amp;lt;tuple_iterator object at 0x000002095F652DD0&amp;gt;, val = True\nfield = &amp;lt;django.db.models.fields.BooleanField: activo&amp;gt;, is_related_object = False, property_names = frozenset({&amp;#x27;pk&amp;#x27;})\n\n    def __init__(self, *args, **kwargs):\n        # Alias some things as locals to avoid repeat global lookups\n        cls = self.__class__\n        opts = self._meta\n        _setattr = setattr\n        _DEFERRED = DEFERRED\n        if opts.abstract:\n            raise TypeError(&amp;quot;Abstract models cannot be instantiated.&amp;quot;)\n    \n        pre_init.send(sender=cls, args=args, kwargs=kwargs)\n    \n        # Set up the storage for instance state\n        self._state = ModelState()\n    \n        # There is a rather weird disparity here; if kwargs, it&amp;#x27;s set, then\n        # args overrides it. It should be one or the other; don&amp;#x27;t duplicate the\n        # work The reason for the kwargs check is that standard iterator passes\n        # in by args, and instantiation for iteration is 33% faster.\n        if len(args) &amp;gt; len(opts.concrete_fields):\n            # Daft, but matches old exception sans the err msg.\n            raise IndexError(&amp;quot;Number of args exceeds number of fields&amp;quot;)\n    \n        if not kwargs:\n            fields_iter = iter(opts.concrete_fields)\n            # The ordering of the zip calls matter - zip throws StopIteration\n            # when an iter throws it. So if the first iter throws it, the\n            # second is *not* consumed. We rely on this, so don&amp;#x27;t change the\n            # order without changing the logic.\n            for val, field in zip(args, fields_iter):\n                if val is _DEFERRED:\n                    continue\n                _setattr(self, field.attname, val)\n        else:\n            # Slower, kwargs-ready version.\n            fields_iter = iter(opts.fields)\n            for val, field in zip(args, fields_iter):\n                if val is _DEFERRED:\n                    continue\n                _setattr(self, field.attname, val)\n                if kwargs.pop(field.name, NOT_PROVIDED) is not NOT_PROVIDED:\n                    raise TypeError(\n                        f&amp;quot;{cls.__qualname__}() got both positional and &amp;quot;\n                        f&amp;quot;keyword arguments for field &amp;#x27;{field.name}&amp;#x27;.&amp;quot;\n                    )\n    \n        # Now we&amp;#x27;re left with the unprocessed fields that *must* come from\n        # keywords, or default.\n    \n        for field in fields_iter:\n            is_related_object = False\n            # Virtual field\n            if field.column is None or field.generated:\n                continue\n            if kwargs:\n                if isinstance(field.remote_field, ForeignObjectRel):\n                    try:\n                        # Assume object instance was passed in.\n                        rel_obj = kwargs.pop(field.name)\n                        is_related_object = True\n                    except KeyError:\n                        try:\n                            # Object instance wasn&amp;#x27;t passed in -- must be an\n                            # ID.\n                            val = kwargs.pop(field.attname)\n                        except KeyError:\n                            val = field.get_default()\n                else:\n                    try:\n                        val = kwargs.pop(field.attname)\n                    except KeyError:\n                        # This is done with an exception rather than the\n                        # default argument on pop because we don&amp;#x27;t want\n                        # get_default() to be evaluated, and then not used.\n                        # Refs #12057.\n                        val = field.get_default()\n            else:\n                val = field.get_default()\n    \n            if is_related_object:\n                # If we are passed a related instance, set it using the\n                # field.name instead of field.attname (e.g. &amp;quot;user&amp;quot; instead of\n                # &amp;quot;user_id&amp;quot;) so that the object gets properly cached (and type\n                # checked) by the RelatedObjectDescriptor.\n                if rel_obj is not _DEFERRED:\n                    _setattr(self, field.name, rel_obj)\n            else:\n                if val is not _DEFERRED:\n                    _setattr(self, field.attname, val)\n    \n        if kwargs:\n            property_names = opts._property_names\n            unexpected = ()\n            for prop, value in kwargs.items():\n                # Any remaining kwargs must correspond to properties or virtual\n                # fields.\n                if prop in property_names:\n                    if value is not _DEFERRED:\n                        _setattr(self, prop, value)\n                else:\n                    try:\n                        opts.get_field(prop)\n                    except FieldDoesNotExist:\n                        unexpected += (prop,)\n                    else:\n                        if value is not _DEFERRED:\n                            _setattr(self, prop, value)\n            if unexpected:\n                unexpected_names = &amp;quot;, &amp;quot;.join(repr(n) for n in unexpected)\n&amp;gt;               raise TypeError(\n                    f&amp;quot;{cls.__name__}() got unexpected keyword arguments: &amp;quot;\n                    f&amp;quot;{unexpected_names}&amp;quot;\n                )\nE               TypeError: Categoria() got unexpected keyword arguments: &amp;#x27;descripcion&amp;#x27;\n\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:590: TypeError\n&#34;}], &#34;rentas/tests.py::test_categoria_por_defecto_activa&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_categoria_por_defecto_activa&#34;, &#34;duration&#34;: &#34;9 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_categoria_por_defecto_activa&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;9 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_soft_delete_categoria&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_soft_delete_categoria&#34;, &#34;duration&#34;: &#34;8 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_soft_delete_categoria&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;8 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_crear_videojuego_con_stock_valido&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_crear_videojuego_con_stock_valido&#34;, &#34;duration&#34;: &#34;22 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_crear_videojuego_con_stock_valido&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;22 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;self = &amp;lt;django.db.backends.utils.CursorWrapper object at 0x00000209618581D0&amp;gt;\nsql = &amp;#x27;INSERT INTO &amp;quot;rentas_videojuego&amp;quot; (&amp;quot;titulo&amp;quot;, &amp;quot;descripcion&amp;quot;, &amp;quot;precio&amp;quot;, &amp;quot;stock&amp;quot;, &amp;quot;url_imagen&amp;quot;, &amp;quot;fecha_lanzamiento&amp;quot;, &amp;quot;categoria_id&amp;quot;, &amp;quot;activo&amp;quot;) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING &amp;quot;rentas_videojuego&amp;quot;.&amp;quot;id&amp;quot;&amp;#x27;\nparams = (&amp;#x27;Call of Duty&amp;#x27;, &amp;#x27;&amp;#x27;, Decimal(&amp;#x27;60&amp;#x27;), 15, None, None, ...)\nignored_wrapper_args = (False, {&amp;#x27;connection&amp;#x27;: &amp;lt;DatabaseWrapper vendor=&amp;#x27;postgresql&amp;#x27; alias=&amp;#x27;default&amp;#x27;&amp;gt;, &amp;#x27;cursor&amp;#x27;: &amp;lt;django.db.backends.utils.CursorWrapper object at 0x00000209618581D0&amp;gt;})\n\n    def _execute(self, sql, params, *ignored_wrapper_args):\n        # Raise a warning during app initialization (stored_app_configs is only\n        # ever set during testing).\n        if not apps.ready and not apps.stored_app_configs:\n            warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)\n        self.db.validate_no_broken_transaction()\n        with self.db.wrap_database_errors:\n            if params is None:\n                # params default might be backend specific.\n                return self.cursor.execute(sql)\n            else:\n&amp;gt;               return self.cursor.execute(sql, params)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE               psycopg2.errors.NotNullViolation: el valor nulo en la columna \u00abfecha_lanzamiento\u00bb de la relaci\u00f3n \u00abrentas_videojuego\u00bb viola la restricci\u00f3n de no nulo\nE               DETAIL:  La fila que falla contiene (1, Call of Duty, , 60.00, 15, null, null, t, 3).\n\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:105: NotNullViolation\n\nThe above exception was the direct cause of the following exception:\n\n    @pytest.mark.django_db\n    def test_crear_videojuego_con_stock_valido():\n        cat = Categoria.objects.create(nombre=&amp;quot;Shooter&amp;quot;)\n&amp;gt;       juego = Videojuego.objects.create(titulo=&amp;quot;Call of Duty&amp;quot;, precio=60.00, stock=15, categoria=cat)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nrentas\\tests.py:33: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nvenv\\Lib\\site-packages\\django\\db\\models\\manager.py:87: in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\query.py:669: in create\n    obj.save(force_insert=True, using=self.db)\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:874: in save\n    self.save_base(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:966: in save_base\n    updated = self._save_table(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:1169: in _save_table\n    results = self._do_insert(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:1220: in _do_insert\n    return manager._insert(\nvenv\\Lib\\site-packages\\django\\db\\models\\manager.py:87: in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\query.py:1918: in _insert\n    return query.get_compiler(using=using).execute_sql(returning_fields)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\sql\\compiler.py:1925: in execute_sql\n    cursor.execute(sql, params)\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:79: in execute\n    return self._execute_with_wrappers(\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:92: in _execute_with_wrappers\n    return executor(sql, params, many, context)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:100: in _execute\n    with self.db.wrap_database_errors:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\utils.py:94: in __exit__\n    raise dj_exc_value.with_traceback(traceback) from exc_value\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nself = &amp;lt;django.db.backends.utils.CursorWrapper object at 0x00000209618581D0&amp;gt;\nsql = &amp;#x27;INSERT INTO &amp;quot;rentas_videojuego&amp;quot; (&amp;quot;titulo&amp;quot;, &amp;quot;descripcion&amp;quot;, &amp;quot;precio&amp;quot;, &amp;quot;stock&amp;quot;, &amp;quot;url_imagen&amp;quot;, &amp;quot;fecha_lanzamiento&amp;quot;, &amp;quot;categoria_id&amp;quot;, &amp;quot;activo&amp;quot;) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING &amp;quot;rentas_videojuego&amp;quot;.&amp;quot;id&amp;quot;&amp;#x27;\nparams = (&amp;#x27;Call of Duty&amp;#x27;, &amp;#x27;&amp;#x27;, Decimal(&amp;#x27;60&amp;#x27;), 15, None, None, ...)\nignored_wrapper_args = (False, {&amp;#x27;connection&amp;#x27;: &amp;lt;DatabaseWrapper vendor=&amp;#x27;postgresql&amp;#x27; alias=&amp;#x27;default&amp;#x27;&amp;gt;, &amp;#x27;cursor&amp;#x27;: &amp;lt;django.db.backends.utils.CursorWrapper object at 0x00000209618581D0&amp;gt;})\n\n    def _execute(self, sql, params, *ignored_wrapper_args):\n        # Raise a warning during app initialization (stored_app_configs is only\n        # ever set during testing).\n        if not apps.ready and not apps.stored_app_configs:\n            warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)\n        self.db.validate_no_broken_transaction()\n        with self.db.wrap_database_errors:\n            if params is None:\n                # params default might be backend specific.\n                return self.cursor.execute(sql)\n            else:\n&amp;gt;               return self.cursor.execute(sql, params)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE               django.db.utils.IntegrityError: el valor nulo en la columna \u00abfecha_lanzamiento\u00bb de la relaci\u00f3n \u00abrentas_videojuego\u00bb viola la restricci\u00f3n de no nulo\nE               DETAIL:  La fila que falla contiene (1, Call of Duty, , 60.00, 15, null, null, t, 3).\n\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:105: IntegrityError\n&#34;}], &#34;rentas/tests.py::test_actualizar_stock_videojuego&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_actualizar_stock_videojuego&#34;, &#34;duration&#34;: &#34;7 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_actualizar_stock_videojuego&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;7 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;self = &amp;lt;django.db.backends.utils.CursorWrapper object at 0x000002096193AE10&amp;gt;\nsql = &amp;#x27;INSERT INTO &amp;quot;rentas_videojuego&amp;quot; (&amp;quot;titulo&amp;quot;, &amp;quot;descripcion&amp;quot;, &amp;quot;precio&amp;quot;, &amp;quot;stock&amp;quot;, &amp;quot;url_imagen&amp;quot;, &amp;quot;fecha_lanzamiento&amp;quot;, &amp;quot;categoria_id&amp;quot;, &amp;quot;activo&amp;quot;) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING &amp;quot;rentas_videojuego&amp;quot;.&amp;quot;id&amp;quot;&amp;#x27;\nparams = (&amp;#x27;Zelda&amp;#x27;, &amp;#x27;&amp;#x27;, Decimal(&amp;#x27;50&amp;#x27;), 5, None, None, ...)\nignored_wrapper_args = (False, {&amp;#x27;connection&amp;#x27;: &amp;lt;DatabaseWrapper vendor=&amp;#x27;postgresql&amp;#x27; alias=&amp;#x27;default&amp;#x27;&amp;gt;, &amp;#x27;cursor&amp;#x27;: &amp;lt;django.db.backends.utils.CursorWrapper object at 0x000002096193AE10&amp;gt;})\n\n    def _execute(self, sql, params, *ignored_wrapper_args):\n        # Raise a warning during app initialization (stored_app_configs is only\n        # ever set during testing).\n        if not apps.ready and not apps.stored_app_configs:\n            warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)\n        self.db.validate_no_broken_transaction()\n        with self.db.wrap_database_errors:\n            if params is None:\n                # params default might be backend specific.\n                return self.cursor.execute(sql)\n            else:\n&amp;gt;               return self.cursor.execute(sql, params)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE               psycopg2.errors.NotNullViolation: el valor nulo en la columna \u00abfecha_lanzamiento\u00bb de la relaci\u00f3n \u00abrentas_videojuego\u00bb viola la restricci\u00f3n de no nulo\nE               DETAIL:  La fila que falla contiene (2, Zelda, , 50.00, 5, null, null, t, 4).\n\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:105: NotNullViolation\n\nThe above exception was the direct cause of the following exception:\n\n    @pytest.mark.django_db\n    def test_actualizar_stock_videojuego():\n        cat = Categoria.objects.create(nombre=&amp;quot;Aventura&amp;quot;)\n&amp;gt;       juego = Videojuego.objects.create(titulo=&amp;quot;Zelda&amp;quot;, precio=50.00, stock=5, categoria=cat)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nrentas\\tests.py:40: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nvenv\\Lib\\site-packages\\django\\db\\models\\manager.py:87: in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\query.py:669: in create\n    obj.save(force_insert=True, using=self.db)\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:874: in save\n    self.save_base(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:966: in save_base\n    updated = self._save_table(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:1169: in _save_table\n    results = self._do_insert(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:1220: in _do_insert\n    return manager._insert(\nvenv\\Lib\\site-packages\\django\\db\\models\\manager.py:87: in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\query.py:1918: in _insert\n    return query.get_compiler(using=using).execute_sql(returning_fields)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\sql\\compiler.py:1925: in execute_sql\n    cursor.execute(sql, params)\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:79: in execute\n    return self._execute_with_wrappers(\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:92: in _execute_with_wrappers\n    return executor(sql, params, many, context)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:100: in _execute\n    with self.db.wrap_database_errors:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\utils.py:94: in __exit__\n    raise dj_exc_value.with_traceback(traceback) from exc_value\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nself = &amp;lt;django.db.backends.utils.CursorWrapper object at 0x000002096193AE10&amp;gt;\nsql = &amp;#x27;INSERT INTO &amp;quot;rentas_videojuego&amp;quot; (&amp;quot;titulo&amp;quot;, &amp;quot;descripcion&amp;quot;, &amp;quot;precio&amp;quot;, &amp;quot;stock&amp;quot;, &amp;quot;url_imagen&amp;quot;, &amp;quot;fecha_lanzamiento&amp;quot;, &amp;quot;categoria_id&amp;quot;, &amp;quot;activo&amp;quot;) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING &amp;quot;rentas_videojuego&amp;quot;.&amp;quot;id&amp;quot;&amp;#x27;\nparams = (&amp;#x27;Zelda&amp;#x27;, &amp;#x27;&amp;#x27;, Decimal(&amp;#x27;50&amp;#x27;), 5, None, None, ...)\nignored_wrapper_args = (False, {&amp;#x27;connection&amp;#x27;: &amp;lt;DatabaseWrapper vendor=&amp;#x27;postgresql&amp;#x27; alias=&amp;#x27;default&amp;#x27;&amp;gt;, &amp;#x27;cursor&amp;#x27;: &amp;lt;django.db.backends.utils.CursorWrapper object at 0x000002096193AE10&amp;gt;})\n\n    def _execute(self, sql, params, *ignored_wrapper_args):\n        # Raise a warning during app initialization (stored_app_configs is only\n        # ever set during testing).\n        if not apps.ready and not apps.stored_app_configs:\n            warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)\n        self.db.validate_no_broken_transaction()\n        with self.db.wrap_database_errors:\n            if params is None:\n                # params default might be backend specific.\n                return self.cursor.execute(sql)\n            else:\n&amp;gt;               return self.cursor.execute(sql, params)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE               django.db.utils.IntegrityError: el valor nulo en la columna \u00abfecha_lanzamiento\u00bb de la relaci\u00f3n \u00abrentas_videojuego\u00bb viola la restricci\u00f3n de no nulo\nE               DETAIL:  La fila que falla contiene (2, Zelda, , 50.00, 5, null, null, t, 4).\n\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:105: IntegrityError\n&#34;}], &#34;rentas/tests.py::test_crear_usuario_vendedor&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_crear_usuario_vendedor&#34;, &#34;duration&#34;: &#34;5 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_crear_usuario_vendedor&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;5 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;@pytest.mark.django_db\n    def test_crear_usuario_vendedor():\n&amp;gt;       vendedor = Usuario.objects.create(nombre=&amp;quot;Juan Perez&amp;quot;, email=&amp;quot;juan@tienda.com&amp;quot;, rol=&amp;quot;Vendedor&amp;quot;, is_active=True)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nrentas\\tests.py:50: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nvenv\\Lib\\site-packages\\django\\db\\models\\manager.py:87: in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\query.py:667: in create\n    obj = self.model(**kwargs)\n          ^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nself = &amp;lt;Usuario: &amp;gt;, args = (), kwargs = {&amp;#x27;nombre&amp;#x27;: &amp;#x27;Juan Perez&amp;#x27;}, cls = &amp;lt;class &amp;#x27;rentas.models.Usuario&amp;#x27;&amp;gt;\nopts = &amp;lt;Options for Usuario&amp;gt;, _setattr = &amp;lt;built-in function setattr&amp;gt;, _DEFERRED = &amp;lt;Deferred field&amp;gt;\nfields_iter = &amp;lt;tuple_iterator object at 0x00000209612B9B70&amp;gt;, val = &amp;#x27;Vendedor&amp;#x27;\nfield = &amp;lt;django.db.models.fields.CharField: rol&amp;gt;, is_related_object = False\nproperty_names = frozenset({&amp;#x27;is_anonymous&amp;#x27;, &amp;#x27;is_authenticated&amp;#x27;, &amp;#x27;pk&amp;#x27;})\n\n    def __init__(self, *args, **kwargs):\n        # Alias some things as locals to avoid repeat global lookups\n        cls = self.__class__\n        opts = self._meta\n        _setattr = setattr\n        _DEFERRED = DEFERRED\n        if opts.abstract:\n            raise TypeError(&amp;quot;Abstract models cannot be instantiated.&amp;quot;)\n    \n        pre_init.send(sender=cls, args=args, kwargs=kwargs)\n    \n        # Set up the storage for instance state\n        self._state = ModelState()\n    \n        # There is a rather weird disparity here; if kwargs, it&amp;#x27;s set, then\n        # args overrides it. It should be one or the other; don&amp;#x27;t duplicate the\n        # work The reason for the kwargs check is that standard iterator passes\n        # in by args, and instantiation for iteration is 33% faster.\n        if len(args) &amp;gt; len(opts.concrete_fields):\n            # Daft, but matches old exception sans the err msg.\n            raise IndexError(&amp;quot;Number of args exceeds number of fields&amp;quot;)\n    \n        if not kwargs:\n            fields_iter = iter(opts.concrete_fields)\n            # The ordering of the zip calls matter - zip throws StopIteration\n            # when an iter throws it. So if the first iter throws it, the\n            # second is *not* consumed. We rely on this, so don&amp;#x27;t change the\n            # order without changing the logic.\n            for val, field in zip(args, fields_iter):\n                if val is _DEFERRED:\n                    continue\n                _setattr(self, field.attname, val)\n        else:\n            # Slower, kwargs-ready version.\n            fields_iter = iter(opts.fields)\n            for val, field in zip(args, fields_iter):\n                if val is _DEFERRED:\n                    continue\n                _setattr(self, field.attname, val)\n                if kwargs.pop(field.name, NOT_PROVIDED) is not NOT_PROVIDED:\n                    raise TypeError(\n                        f&amp;quot;{cls.__qualname__}() got both positional and &amp;quot;\n                        f&amp;quot;keyword arguments for field &amp;#x27;{field.name}&amp;#x27;.&amp;quot;\n                    )\n    \n        # Now we&amp;#x27;re left with the unprocessed fields that *must* come from\n        # keywords, or default.\n    \n        for field in fields_iter:\n            is_related_object = False\n            # Virtual field\n            if field.column is None or field.generated:\n                continue\n            if kwargs:\n                if isinstance(field.remote_field, ForeignObjectRel):\n                    try:\n                        # Assume object instance was passed in.\n                        rel_obj = kwargs.pop(field.name)\n                        is_related_object = True\n                    except KeyError:\n                        try:\n                            # Object instance wasn&amp;#x27;t passed in -- must be an\n                            # ID.\n                            val = kwargs.pop(field.attname)\n                        except KeyError:\n                            val = field.get_default()\n                else:\n                    try:\n                        val = kwargs.pop(field.attname)\n                    except KeyError:\n                        # This is done with an exception rather than the\n                        # default argument on pop because we don&amp;#x27;t want\n                        # get_default() to be evaluated, and then not used.\n                        # Refs #12057.\n                        val = field.get_default()\n            else:\n                val = field.get_default()\n    \n            if is_related_object:\n                # If we are passed a related instance, set it using the\n                # field.name instead of field.attname (e.g. &amp;quot;user&amp;quot; instead of\n                # &amp;quot;user_id&amp;quot;) so that the object gets properly cached (and type\n                # checked) by the RelatedObjectDescriptor.\n                if rel_obj is not _DEFERRED:\n                    _setattr(self, field.name, rel_obj)\n            else:\n                if val is not _DEFERRED:\n                    _setattr(self, field.attname, val)\n    \n        if kwargs:\n            property_names = opts._property_names\n            unexpected = ()\n            for prop, value in kwargs.items():\n                # Any remaining kwargs must correspond to properties or virtual\n                # fields.\n                if prop in property_names:\n                    if value is not _DEFERRED:\n                        _setattr(self, prop, value)\n                else:\n                    try:\n                        opts.get_field(prop)\n                    except FieldDoesNotExist:\n                        unexpected += (prop,)\n                    else:\n                        if value is not _DEFERRED:\n                            _setattr(self, prop, value)\n            if unexpected:\n                unexpected_names = &amp;quot;, &amp;quot;.join(repr(n) for n in unexpected)\n&amp;gt;               raise TypeError(\n                    f&amp;quot;{cls.__name__}() got unexpected keyword arguments: &amp;quot;\n                    f&amp;quot;{unexpected_names}&amp;quot;\n                )\nE               TypeError: Usuario() got unexpected keyword arguments: &amp;#x27;nombre&amp;#x27;\n\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:590: TypeError\n&#34;}], &#34;rentas/tests.py::test_desactivar_usuario_seguridad&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_desactivar_usuario_seguridad&#34;, &#34;duration&#34;: &#34;5 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_desactivar_usuario_seguridad&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;5 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;@pytest.mark.django_db\n    def test_desactivar_usuario_seguridad():\n        # Simulamos que despedimos a un empleado (Soft delete)\n&amp;gt;       empleado = Usuario.objects.create(nombre=&amp;quot;Ana&amp;quot;, email=&amp;quot;ana@tienda.com&amp;quot;, rol=&amp;quot;Vendedor&amp;quot;)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nrentas\\tests.py:57: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nvenv\\Lib\\site-packages\\django\\db\\models\\manager.py:87: in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\query.py:667: in create\n    obj = self.model(**kwargs)\n          ^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nself = &amp;lt;Usuario: &amp;gt;, args = (), kwargs = {&amp;#x27;nombre&amp;#x27;: &amp;#x27;Ana&amp;#x27;}, cls = &amp;lt;class &amp;#x27;rentas.models.Usuario&amp;#x27;&amp;gt;\nopts = &amp;lt;Options for Usuario&amp;gt;, _setattr = &amp;lt;built-in function setattr&amp;gt;, _DEFERRED = &amp;lt;Deferred field&amp;gt;\nfields_iter = &amp;lt;tuple_iterator object at 0x00000209612B90C0&amp;gt;, val = &amp;#x27;Vendedor&amp;#x27;\nfield = &amp;lt;django.db.models.fields.CharField: rol&amp;gt;, is_related_object = False\nproperty_names = frozenset({&amp;#x27;is_anonymous&amp;#x27;, &amp;#x27;is_authenticated&amp;#x27;, &amp;#x27;pk&amp;#x27;})\n\n    def __init__(self, *args, **kwargs):\n        # Alias some things as locals to avoid repeat global lookups\n        cls = self.__class__\n        opts = self._meta\n        _setattr = setattr\n        _DEFERRED = DEFERRED\n        if opts.abstract:\n            raise TypeError(&amp;quot;Abstract models cannot be instantiated.&amp;quot;)\n    \n        pre_init.send(sender=cls, args=args, kwargs=kwargs)\n    \n        # Set up the storage for instance state\n        self._state = ModelState()\n    \n        # There is a rather weird disparity here; if kwargs, it&amp;#x27;s set, then\n        # args overrides it. It should be one or the other; don&amp;#x27;t duplicate the\n        # work The reason for the kwargs check is that standard iterator passes\n        # in by args, and instantiation for iteration is 33% faster.\n        if len(args) &amp;gt; len(opts.concrete_fields):\n            # Daft, but matches old exception sans the err msg.\n            raise IndexError(&amp;quot;Number of args exceeds number of fields&amp;quot;)\n    \n        if not kwargs:\n            fields_iter = iter(opts.concrete_fields)\n            # The ordering of the zip calls matter - zip throws StopIteration\n            # when an iter throws it. So if the first iter throws it, the\n            # second is *not* consumed. We rely on this, so don&amp;#x27;t change the\n            # order without changing the logic.\n            for val, field in zip(args, fields_iter):\n                if val is _DEFERRED:\n                    continue\n                _setattr(self, field.attname, val)\n        else:\n            # Slower, kwargs-ready version.\n            fields_iter = iter(opts.fields)\n            for val, field in zip(args, fields_iter):\n                if val is _DEFERRED:\n                    continue\n                _setattr(self, field.attname, val)\n                if kwargs.pop(field.name, NOT_PROVIDED) is not NOT_PROVIDED:\n                    raise TypeError(\n                        f&amp;quot;{cls.__qualname__}() got both positional and &amp;quot;\n                        f&amp;quot;keyword arguments for field &amp;#x27;{field.name}&amp;#x27;.&amp;quot;\n                    )\n    \n        # Now we&amp;#x27;re left with the unprocessed fields that *must* come from\n        # keywords, or default.\n    \n        for field in fields_iter:\n            is_related_object = False\n            # Virtual field\n            if field.column is None or field.generated:\n                continue\n            if kwargs:\n                if isinstance(field.remote_field, ForeignObjectRel):\n                    try:\n                        # Assume object instance was passed in.\n                        rel_obj = kwargs.pop(field.name)\n                        is_related_object = True\n                    except KeyError:\n                        try:\n                            # Object instance wasn&amp;#x27;t passed in -- must be an\n                            # ID.\n                            val = kwargs.pop(field.attname)\n                        except KeyError:\n                            val = field.get_default()\n                else:\n                    try:\n                        val = kwargs.pop(field.attname)\n                    except KeyError:\n                        # This is done with an exception rather than the\n                        # default argument on pop because we don&amp;#x27;t want\n                        # get_default() to be evaluated, and then not used.\n                        # Refs #12057.\n                        val = field.get_default()\n            else:\n                val = field.get_default()\n    \n            if is_related_object:\n                # If we are passed a related instance, set it using the\n                # field.name instead of field.attname (e.g. &amp;quot;user&amp;quot; instead of\n                # &amp;quot;user_id&amp;quot;) so that the object gets properly cached (and type\n                # checked) by the RelatedObjectDescriptor.\n                if rel_obj is not _DEFERRED:\n                    _setattr(self, field.name, rel_obj)\n            else:\n                if val is not _DEFERRED:\n                    _setattr(self, field.attname, val)\n    \n        if kwargs:\n            property_names = opts._property_names\n            unexpected = ()\n            for prop, value in kwargs.items():\n                # Any remaining kwargs must correspond to properties or virtual\n                # fields.\n                if prop in property_names:\n                    if value is not _DEFERRED:\n                        _setattr(self, prop, value)\n                else:\n                    try:\n                        opts.get_field(prop)\n                    except FieldDoesNotExist:\n                        unexpected += (prop,)\n                    else:\n                        if value is not _DEFERRED:\n                            _setattr(self, prop, value)\n            if unexpected:\n                unexpected_names = &amp;quot;, &amp;quot;.join(repr(n) for n in unexpected)\n&amp;gt;               raise TypeError(\n                    f&amp;quot;{cls.__name__}() got unexpected keyword arguments: &amp;quot;\n                    f&amp;quot;{unexpected_names}&amp;quot;\n                )\nE               TypeError: Usuario() got unexpected keyword arguments: &amp;#x27;nombre&amp;#x27;\n\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:590: TypeError\n&#34;}], &#34;rentas/tests.py::test_crear_reserva_estados_correctos&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_crear_reserva_estados_correctos&#34;, &#34;duration&#34;: &#34;5 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_crear_reserva_estados_correctos&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;5 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;self = &amp;lt;django.db.backends.utils.CursorWrapper object at 0x0000020961DC5DF0&amp;gt;\nsql = &amp;#x27;INSERT INTO &amp;quot;rentas_videojuego&amp;quot; (&amp;quot;titulo&amp;quot;, &amp;quot;descripcion&amp;quot;, &amp;quot;precio&amp;quot;, &amp;quot;stock&amp;quot;, &amp;quot;url_imagen&amp;quot;, &amp;quot;fecha_lanzamiento&amp;quot;, &amp;quot;categoria_id&amp;quot;, &amp;quot;activo&amp;quot;) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING &amp;quot;rentas_videojuego&amp;quot;.&amp;quot;id&amp;quot;&amp;#x27;\nparams = (&amp;#x27;Mortal Kombat&amp;#x27;, &amp;#x27;&amp;#x27;, Decimal(&amp;#x27;40&amp;#x27;), 10, None, None, ...)\nignored_wrapper_args = (False, {&amp;#x27;connection&amp;#x27;: &amp;lt;DatabaseWrapper vendor=&amp;#x27;postgresql&amp;#x27; alias=&amp;#x27;default&amp;#x27;&amp;gt;, &amp;#x27;cursor&amp;#x27;: &amp;lt;django.db.backends.utils.CursorWrapper object at 0x0000020961DC5DF0&amp;gt;})\n\n    def _execute(self, sql, params, *ignored_wrapper_args):\n        # Raise a warning during app initialization (stored_app_configs is only\n        # ever set during testing).\n        if not apps.ready and not apps.stored_app_configs:\n            warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)\n        self.db.validate_no_broken_transaction()\n        with self.db.wrap_database_errors:\n            if params is None:\n                # params default might be backend specific.\n                return self.cursor.execute(sql)\n            else:\n&amp;gt;               return self.cursor.execute(sql, params)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE               psycopg2.errors.NotNullViolation: el valor nulo en la columna \u00abfecha_lanzamiento\u00bb de la relaci\u00f3n \u00abrentas_videojuego\u00bb viola la restricci\u00f3n de no nulo\nE               DETAIL:  La fila que falla contiene (3, Mortal Kombat, , 40.00, 10, null, null, t, 5).\n\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:105: NotNullViolation\n\nThe above exception was the direct cause of the following exception:\n\n    @pytest.mark.django_db\n    def test_crear_reserva_estados_correctos():\n        cat = Categoria.objects.create(nombre=&amp;quot;Peleas&amp;quot;)\n&amp;gt;       juego = Videojuego.objects.create(titulo=&amp;quot;Mortal Kombat&amp;quot;, precio=40.00, stock=10, categoria=cat)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nrentas\\tests.py:68: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nvenv\\Lib\\site-packages\\django\\db\\models\\manager.py:87: in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\query.py:669: in create\n    obj.save(force_insert=True, using=self.db)\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:874: in save\n    self.save_base(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:966: in save_base\n    updated = self._save_table(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:1169: in _save_table\n    results = self._do_insert(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:1220: in _do_insert\n    return manager._insert(\nvenv\\Lib\\site-packages\\django\\db\\models\\manager.py:87: in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\query.py:1918: in _insert\n    return query.get_compiler(using=using).execute_sql(returning_fields)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\sql\\compiler.py:1925: in execute_sql\n    cursor.execute(sql, params)\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:79: in execute\n    return self._execute_with_wrappers(\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:92: in _execute_with_wrappers\n    return executor(sql, params, many, context)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:100: in _execute\n    with self.db.wrap_database_errors:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\utils.py:94: in __exit__\n    raise dj_exc_value.with_traceback(traceback) from exc_value\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nself = &amp;lt;django.db.backends.utils.CursorWrapper object at 0x0000020961DC5DF0&amp;gt;\nsql = &amp;#x27;INSERT INTO &amp;quot;rentas_videojuego&amp;quot; (&amp;quot;titulo&amp;quot;, &amp;quot;descripcion&amp;quot;, &amp;quot;precio&amp;quot;, &amp;quot;stock&amp;quot;, &amp;quot;url_imagen&amp;quot;, &amp;quot;fecha_lanzamiento&amp;quot;, &amp;quot;categoria_id&amp;quot;, &amp;quot;activo&amp;quot;) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING &amp;quot;rentas_videojuego&amp;quot;.&amp;quot;id&amp;quot;&amp;#x27;\nparams = (&amp;#x27;Mortal Kombat&amp;#x27;, &amp;#x27;&amp;#x27;, Decimal(&amp;#x27;40&amp;#x27;), 10, None, None, ...)\nignored_wrapper_args = (False, {&amp;#x27;connection&amp;#x27;: &amp;lt;DatabaseWrapper vendor=&amp;#x27;postgresql&amp;#x27; alias=&amp;#x27;default&amp;#x27;&amp;gt;, &amp;#x27;cursor&amp;#x27;: &amp;lt;django.db.backends.utils.CursorWrapper object at 0x0000020961DC5DF0&amp;gt;})\n\n    def _execute(self, sql, params, *ignored_wrapper_args):\n        # Raise a warning during app initialization (stored_app_configs is only\n        # ever set during testing).\n        if not apps.ready and not apps.stored_app_configs:\n            warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)\n        self.db.validate_no_broken_transaction()\n        with self.db.wrap_database_errors:\n            if params is None:\n                # params default might be backend specific.\n                return self.cursor.execute(sql)\n            else:\n&amp;gt;               return self.cursor.execute(sql, params)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE               django.db.utils.IntegrityError: el valor nulo en la columna \u00abfecha_lanzamiento\u00bb de la relaci\u00f3n \u00abrentas_videojuego\u00bb viola la restricci\u00f3n de no nulo\nE               DETAIL:  La fila que falla contiene (3, Mortal Kombat, , 40.00, 10, null, null, t, 5).\n\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:105: IntegrityError\n&#34;}], &#34;rentas/tests.py::test_logica_descuento_stock_por_reserva&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_logica_descuento_stock_por_reserva&#34;, &#34;duration&#34;: &#34;6 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_logica_descuento_stock_por_reserva&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;6 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;self = &amp;lt;django.db.backends.utils.CursorWrapper object at 0x000002096196E3F0&amp;gt;\nsql = &amp;#x27;INSERT INTO &amp;quot;rentas_videojuego&amp;quot; (&amp;quot;titulo&amp;quot;, &amp;quot;descripcion&amp;quot;, &amp;quot;precio&amp;quot;, &amp;quot;stock&amp;quot;, &amp;quot;url_imagen&amp;quot;, &amp;quot;fecha_lanzamiento&amp;quot;, &amp;quot;categoria_id&amp;quot;, &amp;quot;activo&amp;quot;) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING &amp;quot;rentas_videojuego&amp;quot;.&amp;quot;id&amp;quot;&amp;#x27;\nparams = (&amp;#x27;GTA V&amp;#x27;, &amp;#x27;&amp;#x27;, Decimal(&amp;#x27;30&amp;#x27;), 10, None, None, ...)\nignored_wrapper_args = (False, {&amp;#x27;connection&amp;#x27;: &amp;lt;DatabaseWrapper vendor=&amp;#x27;postgresql&amp;#x27; alias=&amp;#x27;default&amp;#x27;&amp;gt;, &amp;#x27;cursor&amp;#x27;: &amp;lt;django.db.backends.utils.CursorWrapper object at 0x000002096196E3F0&amp;gt;})\n\n    def _execute(self, sql, params, *ignored_wrapper_args):\n        # Raise a warning during app initialization (stored_app_configs is only\n        # ever set during testing).\n        if not apps.ready and not apps.stored_app_configs:\n            warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)\n        self.db.validate_no_broken_transaction()\n        with self.db.wrap_database_errors:\n            if params is None:\n                # params default might be backend specific.\n                return self.cursor.execute(sql)\n            else:\n&amp;gt;               return self.cursor.execute(sql, params)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE               psycopg2.errors.NotNullViolation: el valor nulo en la columna \u00abfecha_lanzamiento\u00bb de la relaci\u00f3n \u00abrentas_videojuego\u00bb viola la restricci\u00f3n de no nulo\nE               DETAIL:  La fila que falla contiene (4, GTA V, , 30.00, 10, null, null, t, 6).\n\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:105: NotNullViolation\n\nThe above exception was the direct cause of the following exception:\n\n    @pytest.mark.django_db\n    def test_logica_descuento_stock_por_reserva():\n        # Validamos que el stock baje matem\u00e1ticamente cuando alguien reserva\n        cat = Categoria.objects.create(nombre=&amp;quot;Mundo Abierto&amp;quot;)\n&amp;gt;       juego = Videojuego.objects.create(titulo=&amp;quot;GTA V&amp;quot;, precio=30.00, stock=10, categoria=cat)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nrentas\\tests.py:83: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nvenv\\Lib\\site-packages\\django\\db\\models\\manager.py:87: in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\query.py:669: in create\n    obj.save(force_insert=True, using=self.db)\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:874: in save\n    self.save_base(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:966: in save_base\n    updated = self._save_table(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:1169: in _save_table\n    results = self._do_insert(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:1220: in _do_insert\n    return manager._insert(\nvenv\\Lib\\site-packages\\django\\db\\models\\manager.py:87: in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\query.py:1918: in _insert\n    return query.get_compiler(using=using).execute_sql(returning_fields)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\sql\\compiler.py:1925: in execute_sql\n    cursor.execute(sql, params)\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:79: in execute\n    return self._execute_with_wrappers(\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:92: in _execute_with_wrappers\n    return executor(sql, params, many, context)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:100: in _execute\n    with self.db.wrap_database_errors:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\utils.py:94: in __exit__\n    raise dj_exc_value.with_traceback(traceback) from exc_value\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nself = &amp;lt;django.db.backends.utils.CursorWrapper object at 0x000002096196E3F0&amp;gt;\nsql = &amp;#x27;INSERT INTO &amp;quot;rentas_videojuego&amp;quot; (&amp;quot;titulo&amp;quot;, &amp;quot;descripcion&amp;quot;, &amp;quot;precio&amp;quot;, &amp;quot;stock&amp;quot;, &amp;quot;url_imagen&amp;quot;, &amp;quot;fecha_lanzamiento&amp;quot;, &amp;quot;categoria_id&amp;quot;, &amp;quot;activo&amp;quot;) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING &amp;quot;rentas_videojuego&amp;quot;.&amp;quot;id&amp;quot;&amp;#x27;\nparams = (&amp;#x27;GTA V&amp;#x27;, &amp;#x27;&amp;#x27;, Decimal(&amp;#x27;30&amp;#x27;), 10, None, None, ...)\nignored_wrapper_args = (False, {&amp;#x27;connection&amp;#x27;: &amp;lt;DatabaseWrapper vendor=&amp;#x27;postgresql&amp;#x27; alias=&amp;#x27;default&amp;#x27;&amp;gt;, &amp;#x27;cursor&amp;#x27;: &amp;lt;django.db.backends.utils.CursorWrapper object at 0x000002096196E3F0&amp;gt;})\n\n    def _execute(self, sql, params, *ignored_wrapper_args):\n        # Raise a warning during app initialization (stored_app_configs is only\n        # ever set during testing).\n        if not apps.ready and not apps.stored_app_configs:\n            warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)\n        self.db.validate_no_broken_transaction()\n        with self.db.wrap_database_errors:\n            if params is None:\n                # params default might be backend specific.\n                return self.cursor.execute(sql)\n            else:\n&amp;gt;               return self.cursor.execute(sql, params)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE               django.db.utils.IntegrityError: el valor nulo en la columna \u00abfecha_lanzamiento\u00bb de la relaci\u00f3n \u00abrentas_videojuego\u00bb viola la restricci\u00f3n de no nulo\nE               DETAIL:  La fila que falla contiene (4, GTA V, , 30.00, 10, null, null, t, 6).\n\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:105: IntegrityError\n&#34;}], &#34;rentas/tests.py::test_logica_restauracion_stock_por_cancelacion&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_logica_restauracion_stock_por_cancelacion&#34;, &#34;duration&#34;: &#34;8 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_logica_restauracion_stock_por_cancelacion&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;8 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;self = &amp;lt;django.db.backends.utils.CursorWrapper object at 0x000002096196E510&amp;gt;\nsql = &amp;#x27;INSERT INTO &amp;quot;rentas_videojuego&amp;quot; (&amp;quot;titulo&amp;quot;, &amp;quot;descripcion&amp;quot;, &amp;quot;precio&amp;quot;, &amp;quot;stock&amp;quot;, &amp;quot;url_imagen&amp;quot;, &amp;quot;fecha_lanzamiento&amp;quot;, &amp;quot;categoria_id&amp;quot;, &amp;quot;activo&amp;quot;) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING &amp;quot;rentas_videojuego&amp;quot;.&amp;quot;id&amp;quot;&amp;#x27;\nparams = (&amp;#x27;Minecraft&amp;#x27;, &amp;#x27;&amp;#x27;, Decimal(&amp;#x27;20&amp;#x27;), 5, None, None, ...)\nignored_wrapper_args = (False, {&amp;#x27;connection&amp;#x27;: &amp;lt;DatabaseWrapper vendor=&amp;#x27;postgresql&amp;#x27; alias=&amp;#x27;default&amp;#x27;&amp;gt;, &amp;#x27;cursor&amp;#x27;: &amp;lt;django.db.backends.utils.CursorWrapper object at 0x000002096196E510&amp;gt;})\n\n    def _execute(self, sql, params, *ignored_wrapper_args):\n        # Raise a warning during app initialization (stored_app_configs is only\n        # ever set during testing).\n        if not apps.ready and not apps.stored_app_configs:\n            warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)\n        self.db.validate_no_broken_transaction()\n        with self.db.wrap_database_errors:\n            if params is None:\n                # params default might be backend specific.\n                return self.cursor.execute(sql)\n            else:\n&amp;gt;               return self.cursor.execute(sql, params)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE               psycopg2.errors.NotNullViolation: el valor nulo en la columna \u00abfecha_lanzamiento\u00bb de la relaci\u00f3n \u00abrentas_videojuego\u00bb viola la restricci\u00f3n de no nulo\nE               DETAIL:  La fila que falla contiene (5, Minecraft, , 20.00, 5, null, null, t, 7).\n\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:105: NotNullViolation\n\nThe above exception was the direct cause of the following exception:\n\n    @pytest.mark.django_db\n    def test_logica_restauracion_stock_por_cancelacion():\n        # Validamos que el stock regrese si la reserva se cancela\n        cat = Categoria.objects.create(nombre=&amp;quot;Mundo Abierto&amp;quot;)\n&amp;gt;       juego = Videojuego.objects.create(titulo=&amp;quot;Minecraft&amp;quot;, precio=20.00, stock=5, categoria=cat)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nrentas\\tests.py:96: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nvenv\\Lib\\site-packages\\django\\db\\models\\manager.py:87: in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\query.py:669: in create\n    obj.save(force_insert=True, using=self.db)\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:874: in save\n    self.save_base(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:966: in save_base\n    updated = self._save_table(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:1169: in _save_table\n    results = self._do_insert(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:1220: in _do_insert\n    return manager._insert(\nvenv\\Lib\\site-packages\\django\\db\\models\\manager.py:87: in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\query.py:1918: in _insert\n    return query.get_compiler(using=using).execute_sql(returning_fields)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\sql\\compiler.py:1925: in execute_sql\n    cursor.execute(sql, params)\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:79: in execute\n    return self._execute_with_wrappers(\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:92: in _execute_with_wrappers\n    return executor(sql, params, many, context)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:100: in _execute\n    with self.db.wrap_database_errors:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\utils.py:94: in __exit__\n    raise dj_exc_value.with_traceback(traceback) from exc_value\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nself = &amp;lt;django.db.backends.utils.CursorWrapper object at 0x000002096196E510&amp;gt;\nsql = &amp;#x27;INSERT INTO &amp;quot;rentas_videojuego&amp;quot; (&amp;quot;titulo&amp;quot;, &amp;quot;descripcion&amp;quot;, &amp;quot;precio&amp;quot;, &amp;quot;stock&amp;quot;, &amp;quot;url_imagen&amp;quot;, &amp;quot;fecha_lanzamiento&amp;quot;, &amp;quot;categoria_id&amp;quot;, &amp;quot;activo&amp;quot;) VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING &amp;quot;rentas_videojuego&amp;quot;.&amp;quot;id&amp;quot;&amp;#x27;\nparams = (&amp;#x27;Minecraft&amp;#x27;, &amp;#x27;&amp;#x27;, Decimal(&amp;#x27;20&amp;#x27;), 5, None, None, ...)\nignored_wrapper_args = (False, {&amp;#x27;connection&amp;#x27;: &amp;lt;DatabaseWrapper vendor=&amp;#x27;postgresql&amp;#x27; alias=&amp;#x27;default&amp;#x27;&amp;gt;, &amp;#x27;cursor&amp;#x27;: &amp;lt;django.db.backends.utils.CursorWrapper object at 0x000002096196E510&amp;gt;})\n\n    def _execute(self, sql, params, *ignored_wrapper_args):\n        # Raise a warning during app initialization (stored_app_configs is only\n        # ever set during testing).\n        if not apps.ready and not apps.stored_app_configs:\n            warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)\n        self.db.validate_no_broken_transaction()\n        with self.db.wrap_database_errors:\n            if params is None:\n                # params default might be backend specific.\n                return self.cursor.execute(sql)\n            else:\n&amp;gt;               return self.cursor.execute(sql, params)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE               django.db.utils.IntegrityError: el valor nulo en la columna \u00abfecha_lanzamiento\u00bb de la relaci\u00f3n \u00abrentas_videojuego\u00bb viola la restricci\u00f3n de no nulo\nE               DETAIL:  La fila que falla contiene (5, Minecraft, , 20.00, 5, null, null, t, 7).\n\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:105: IntegrityError\n&#34;}], &#34;rentas/tests.py::test_registrar_venta_nueva&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_registrar_venta_nueva&#34;, &#34;duration&#34;: &#34;8 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_registrar_venta_nueva&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;8 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;self = &amp;lt;django.db.backends.utils.CursorWrapper object at 0x000002096196E810&amp;gt;\nsql = &amp;#x27;INSERT INTO &amp;quot;rentas_venta&amp;quot; (&amp;quot;fecha_venta&amp;quot;, &amp;quot;total&amp;quot;, &amp;quot;codigo_reserva&amp;quot;, &amp;quot;cliente_nombre&amp;quot;, &amp;quot;cliente_cedula&amp;quot;, &amp;quot;usuario_id&amp;quot;) VALUES (%s, %s, %s, %s, %s, %s) RETURNING &amp;quot;rentas_venta&amp;quot;.&amp;quot;id&amp;quot;&amp;#x27;\nparams = (datetime.datetime(2026, 4, 19, 8, 2, 4, 299797, tzinfo=datetime.timezone.utc), Decimal(&amp;#x27;120.5&amp;#x27;), None, &amp;#x27;Carlos&amp;#x27;, &amp;#x27;&amp;#x27;, None)\nignored_wrapper_args = (False, {&amp;#x27;connection&amp;#x27;: &amp;lt;DatabaseWrapper vendor=&amp;#x27;postgresql&amp;#x27; alias=&amp;#x27;default&amp;#x27;&amp;gt;, &amp;#x27;cursor&amp;#x27;: &amp;lt;django.db.backends.utils.CursorWrapper object at 0x000002096196E810&amp;gt;})\n\n    def _execute(self, sql, params, *ignored_wrapper_args):\n        # Raise a warning during app initialization (stored_app_configs is only\n        # ever set during testing).\n        if not apps.ready and not apps.stored_app_configs:\n            warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)\n        self.db.validate_no_broken_transaction()\n        with self.db.wrap_database_errors:\n            if params is None:\n                # params default might be backend specific.\n                return self.cursor.execute(sql)\n            else:\n&amp;gt;               return self.cursor.execute(sql, params)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE               psycopg2.errors.NotNullViolation: el valor nulo en la columna \u00abusuario_id\u00bb de la relaci\u00f3n \u00abrentas_venta\u00bb viola la restricci\u00f3n de no nulo\nE               DETAIL:  La fila que falla contiene (1, 2026-04-19 08:02:04.299797+00, 120.50, null, Carlos, , null).\n\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:105: NotNullViolation\n\nThe above exception was the direct cause of the following exception:\n\n    @pytest.mark.django_db\n    def test_registrar_venta_nueva():\n&amp;gt;       venta = Venta.objects.create(\n            cliente_nombre=&amp;quot;Carlos&amp;quot;,\n            total=120.50,\n            fecha_venta=timezone.now()\n        )\n\nrentas\\tests.py:108: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nvenv\\Lib\\site-packages\\django\\db\\models\\manager.py:87: in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\query.py:669: in create\n    obj.save(force_insert=True, using=self.db)\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:874: in save\n    self.save_base(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:966: in save_base\n    updated = self._save_table(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:1169: in _save_table\n    results = self._do_insert(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:1220: in _do_insert\n    return manager._insert(\nvenv\\Lib\\site-packages\\django\\db\\models\\manager.py:87: in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\query.py:1918: in _insert\n    return query.get_compiler(using=using).execute_sql(returning_fields)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\sql\\compiler.py:1925: in execute_sql\n    cursor.execute(sql, params)\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:79: in execute\n    return self._execute_with_wrappers(\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:92: in _execute_with_wrappers\n    return executor(sql, params, many, context)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:100: in _execute\n    with self.db.wrap_database_errors:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\utils.py:94: in __exit__\n    raise dj_exc_value.with_traceback(traceback) from exc_value\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nself = &amp;lt;django.db.backends.utils.CursorWrapper object at 0x000002096196E810&amp;gt;\nsql = &amp;#x27;INSERT INTO &amp;quot;rentas_venta&amp;quot; (&amp;quot;fecha_venta&amp;quot;, &amp;quot;total&amp;quot;, &amp;quot;codigo_reserva&amp;quot;, &amp;quot;cliente_nombre&amp;quot;, &amp;quot;cliente_cedula&amp;quot;, &amp;quot;usuario_id&amp;quot;) VALUES (%s, %s, %s, %s, %s, %s) RETURNING &amp;quot;rentas_venta&amp;quot;.&amp;quot;id&amp;quot;&amp;#x27;\nparams = (datetime.datetime(2026, 4, 19, 8, 2, 4, 299797, tzinfo=datetime.timezone.utc), Decimal(&amp;#x27;120.5&amp;#x27;), None, &amp;#x27;Carlos&amp;#x27;, &amp;#x27;&amp;#x27;, None)\nignored_wrapper_args = (False, {&amp;#x27;connection&amp;#x27;: &amp;lt;DatabaseWrapper vendor=&amp;#x27;postgresql&amp;#x27; alias=&amp;#x27;default&amp;#x27;&amp;gt;, &amp;#x27;cursor&amp;#x27;: &amp;lt;django.db.backends.utils.CursorWrapper object at 0x000002096196E810&amp;gt;})\n\n    def _execute(self, sql, params, *ignored_wrapper_args):\n        # Raise a warning during app initialization (stored_app_configs is only\n        # ever set during testing).\n        if not apps.ready and not apps.stored_app_configs:\n            warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)\n        self.db.validate_no_broken_transaction()\n        with self.db.wrap_database_errors:\n            if params is None:\n                # params default might be backend specific.\n                return self.cursor.execute(sql)\n            else:\n&amp;gt;               return self.cursor.execute(sql, params)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE               django.db.utils.IntegrityError: el valor nulo en la columna \u00abusuario_id\u00bb de la relaci\u00f3n \u00abrentas_venta\u00bb viola la restricci\u00f3n de no nulo\nE               DETAIL:  La fila que falla contiene (1, 2026-04-19 08:02:04.299797+00, 120.50, null, Carlos, , null).\n\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:105: IntegrityError\n&#34;}], &#34;rentas/tests.py::test_calculo_total_ventas_es_positivo&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Failed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_calculo_total_ventas_es_positivo&#34;, &#34;duration&#34;: &#34;260 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Failed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_calculo_total_ventas_es_positivo&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;260 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;self = &amp;lt;django.db.backends.utils.CursorWrapper object at 0x00000209617C41D0&amp;gt;\nsql = &amp;#x27;INSERT INTO &amp;quot;rentas_venta&amp;quot; (&amp;quot;fecha_venta&amp;quot;, &amp;quot;total&amp;quot;, &amp;quot;codigo_reserva&amp;quot;, &amp;quot;cliente_nombre&amp;quot;, &amp;quot;cliente_cedula&amp;quot;, &amp;quot;usuario_id&amp;quot;) VALUES (%s, %s, %s, %s, %s, %s) RETURNING &amp;quot;rentas_venta&amp;quot;.&amp;quot;id&amp;quot;&amp;#x27;\nparams = (datetime.datetime(2026, 4, 19, 8, 2, 4, 527323, tzinfo=datetime.timezone.utc), Decimal(&amp;#x27;15&amp;#x27;), None, &amp;#x27;Sistema&amp;#x27;, &amp;#x27;&amp;#x27;, None)\nignored_wrapper_args = (False, {&amp;#x27;connection&amp;#x27;: &amp;lt;DatabaseWrapper vendor=&amp;#x27;postgresql&amp;#x27; alias=&amp;#x27;default&amp;#x27;&amp;gt;, &amp;#x27;cursor&amp;#x27;: &amp;lt;django.db.backends.utils.CursorWrapper object at 0x00000209617C41D0&amp;gt;})\n\n    def _execute(self, sql, params, *ignored_wrapper_args):\n        # Raise a warning during app initialization (stored_app_configs is only\n        # ever set during testing).\n        if not apps.ready and not apps.stored_app_configs:\n            warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)\n        self.db.validate_no_broken_transaction()\n        with self.db.wrap_database_errors:\n            if params is None:\n                # params default might be backend specific.\n                return self.cursor.execute(sql)\n            else:\n&amp;gt;               return self.cursor.execute(sql, params)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE               psycopg2.errors.NotNullViolation: el valor nulo en la columna \u00abusuario_id\u00bb de la relaci\u00f3n \u00abrentas_venta\u00bb viola la restricci\u00f3n de no nulo\nE               DETAIL:  La fila que falla contiene (2, 2026-04-19 08:02:04.527323+00, 15.00, null, Sistema, , null).\n\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:105: NotNullViolation\n\nThe above exception was the direct cause of the following exception:\n\n    @pytest.mark.django_db\n    def test_calculo_total_ventas_es_positivo():\n        # Una venta en un sistema de calidad jam\u00e1s deber\u00eda registrar un total negativo\n&amp;gt;       venta = Venta.objects.create(cliente_nombre=&amp;quot;Sistema&amp;quot;, total=15.00)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\nrentas\\tests.py:119: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\nvenv\\Lib\\site-packages\\django\\db\\models\\manager.py:87: in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\query.py:669: in create\n    obj.save(force_insert=True, using=self.db)\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:874: in save\n    self.save_base(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:966: in save_base\n    updated = self._save_table(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:1169: in _save_table\n    results = self._do_insert(\nvenv\\Lib\\site-packages\\django\\db\\models\\base.py:1220: in _do_insert\n    return manager._insert(\nvenv\\Lib\\site-packages\\django\\db\\models\\manager.py:87: in manager_method\n    return getattr(self.get_queryset(), name)(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\query.py:1918: in _insert\n    return query.get_compiler(using=using).execute_sql(returning_fields)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\models\\sql\\compiler.py:1925: in execute_sql\n    cursor.execute(sql, params)\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:79: in execute\n    return self._execute_with_wrappers(\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:92: in _execute_with_wrappers\n    return executor(sql, params, many, context)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:100: in _execute\n    with self.db.wrap_database_errors:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nvenv\\Lib\\site-packages\\django\\db\\utils.py:94: in __exit__\n    raise dj_exc_value.with_traceback(traceback) from exc_value\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\nself = &amp;lt;django.db.backends.utils.CursorWrapper object at 0x00000209617C41D0&amp;gt;\nsql = &amp;#x27;INSERT INTO &amp;quot;rentas_venta&amp;quot; (&amp;quot;fecha_venta&amp;quot;, &amp;quot;total&amp;quot;, &amp;quot;codigo_reserva&amp;quot;, &amp;quot;cliente_nombre&amp;quot;, &amp;quot;cliente_cedula&amp;quot;, &amp;quot;usuario_id&amp;quot;) VALUES (%s, %s, %s, %s, %s, %s) RETURNING &amp;quot;rentas_venta&amp;quot;.&amp;quot;id&amp;quot;&amp;#x27;\nparams = (datetime.datetime(2026, 4, 19, 8, 2, 4, 527323, tzinfo=datetime.timezone.utc), Decimal(&amp;#x27;15&amp;#x27;), None, &amp;#x27;Sistema&amp;#x27;, &amp;#x27;&amp;#x27;, None)\nignored_wrapper_args = (False, {&amp;#x27;connection&amp;#x27;: &amp;lt;DatabaseWrapper vendor=&amp;#x27;postgresql&amp;#x27; alias=&amp;#x27;default&amp;#x27;&amp;gt;, &amp;#x27;cursor&amp;#x27;: &amp;lt;django.db.backends.utils.CursorWrapper object at 0x00000209617C41D0&amp;gt;})\n\n    def _execute(self, sql, params, *ignored_wrapper_args):\n        # Raise a warning during app initialization (stored_app_configs is only\n        # ever set during testing).\n        if not apps.ready and not apps.stored_app_configs:\n            warnings.warn(self.APPS_NOT_READY_WARNING_MSG, category=RuntimeWarning)\n        self.db.validate_no_broken_transaction()\n        with self.db.wrap_database_errors:\n            if params is None:\n                # params default might be backend specific.\n                return self.cursor.execute(sql)\n            else:\n&amp;gt;               return self.cursor.execute(sql, params)\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE               django.db.utils.IntegrityError: el valor nulo en la columna \u00abusuario_id\u00bb de la relaci\u00f3n \u00abrentas_venta\u00bb viola la restricci\u00f3n de no nulo\nE               DETAIL:  La fila que falla contiene (2, 2026-04-19 08:02:04.527323+00, 15.00, null, Sistema, , null).\n\nvenv\\Lib\\site-packages\\django\\db\\backends\\utils.py:105: IntegrityError\n&#34;}]}, &#34;renderCollapsed&#34;: [&#34;passed&#34;], &#34;initialSort&#34;: &#34;result&#34;, &#34;title&#34;: &#34;informe_calidad.html&#34;}"></div>
+    <div id="data-container" data-jsonblob="{&#34;environment&#34;: {&#34;Python&#34;: &#34;3.13.7&#34;, &#34;Platform&#34;: &#34;Windows-11-10.0.26200-SP0&#34;, &#34;Packages&#34;: {&#34;pytest&#34;: &#34;9.0.3&#34;, &#34;pluggy&#34;: &#34;1.6.0&#34;}, &#34;Plugins&#34;: {&#34;django&#34;: &#34;4.12.0&#34;, &#34;html&#34;: &#34;4.2.0&#34;, &#34;metadata&#34;: &#34;3.1.1&#34;}}, &#34;tests&#34;: {&#34;rentas/tests.py::test_01_categoria_creacion_exitosa&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_01_categoria_creacion_exitosa&#34;, &#34;duration&#34;: &#34;962 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_01_categoria_creacion_exitosa&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;962 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_02_categoria_bloquea_numeros_en_nombre&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_02_categoria_bloquea_numeros_en_nombre&#34;, &#34;duration&#34;: &#34;6 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_02_categoria_bloquea_numeros_en_nombre&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;6 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_03_categoria_duplicada_bloqueada&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_03_categoria_duplicada_bloqueada&#34;, &#34;duration&#34;: &#34;9 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_03_categoria_duplicada_bloqueada&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;9 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_04_videojuego_creacion_exitosa&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_04_videojuego_creacion_exitosa&#34;, &#34;duration&#34;: &#34;11 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_04_videojuego_creacion_exitosa&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;11 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_05_videojuego_precio_y_stock_negativos_bloqueados&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_05_videojuego_precio_y_stock_negativos_bloqueados&#34;, &#34;duration&#34;: &#34;10 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_05_videojuego_precio_y_stock_negativos_bloqueados&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;10 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_06_videojuego_titulo_unico_garantizado&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_06_videojuego_titulo_unico_garantizado&#34;, &#34;duration&#34;: &#34;10 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_06_videojuego_titulo_unico_garantizado&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;10 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_07_videojuego_fechas_logicas&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_07_videojuego_fechas_logicas&#34;, &#34;duration&#34;: &#34;10 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_07_videojuego_fechas_logicas&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;10 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_08_usuario_creacion_con_encriptacion&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_08_usuario_creacion_con_encriptacion&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_08_usuario_creacion_con_encriptacion&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_09_usuario_roles_estrictos_permitidos&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_09_usuario_roles_estrictos_permitidos&#34;, &#34;duration&#34;: &#34;50 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_09_usuario_roles_estrictos_permitidos&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;50 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_10_usuario_correo_unico_garantizado&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_10_usuario_correo_unico_garantizado&#34;, &#34;duration&#34;: &#34;9 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_10_usuario_correo_unico_garantizado&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;9 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_11_reserva_cedula_valida_modulo10_pasa&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_11_reserva_cedula_valida_modulo10_pasa&#34;, &#34;duration&#34;: &#34;17 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_11_reserva_cedula_valida_modulo10_pasa&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;17 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_12_reserva_cedula_invalida_modulo10_falla&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_12_reserva_cedula_invalida_modulo10_falla&#34;, &#34;duration&#34;: &#34;5 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_12_reserva_cedula_invalida_modulo10_falla&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;5 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_13_reserva_telefono_ecuatoriano_valido&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_13_reserva_telefono_ecuatoriano_valido&#34;, &#34;duration&#34;: &#34;4 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_13_reserva_telefono_ecuatoriano_valido&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;4 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_14_reserva_nombre_sin_numeros&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_14_reserva_nombre_sin_numeros&#34;, &#34;duration&#34;: &#34;5 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_14_reserva_nombre_sin_numeros&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;5 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_15_reserva_cantidad_maxima_permitida&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_15_reserva_cantidad_maxima_permitida&#34;, &#34;duration&#34;: &#34;8 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_15_reserva_cantidad_maxima_permitida&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;8 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_16_reserva_bloqueo_acaparamiento_activo&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_16_reserva_bloqueo_acaparamiento_activo&#34;, &#34;duration&#34;: &#34;12 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_16_reserva_bloqueo_acaparamiento_activo&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;12 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_17_reserva_descuenta_stock_correctamente&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_17_reserva_descuenta_stock_correctamente&#34;, &#34;duration&#34;: &#34;13 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_17_reserva_descuenta_stock_correctamente&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;13 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_18_venta_invalida_sin_detalles&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_18_venta_invalida_sin_detalles&#34;, &#34;duration&#34;: &#34;7 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_18_venta_invalida_sin_detalles&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;7 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_19_venta_invalida_cantidad_cero_o_negativa&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_19_venta_invalida_cantidad_cero_o_negativa&#34;, &#34;duration&#34;: &#34;11 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_19_venta_invalida_cantidad_cero_o_negativa&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;11 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}], &#34;rentas/tests.py::test_20_venta_es_inmutable_anti_fraude&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;rentas/tests.py::test_20_venta_es_inmutable_anti_fraude&#34;, &#34;duration&#34;: &#34;192 ms&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;rentas/tests.py::test_20_venta_es_inmutable_anti_fraude&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;192 ms&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;No log output captured.&#34;}]}, &#34;renderCollapsed&#34;: [&#34;passed&#34;], &#34;initialSort&#34;: &#34;result&#34;, &#34;title&#34;: &#34;informe_calidad.html&#34;}"></div>
     <script>
       (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 const { getCollapsedCategory, setCollapsedIds } = require('./storage.js')
