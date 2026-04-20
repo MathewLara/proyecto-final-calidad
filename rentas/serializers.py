@@ -111,16 +111,34 @@ class VideojuegoSerializer(serializers.ModelSerializer):
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        # NOTA: Agregué first_name y last_name para que puedas guardar los nombres reales
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'rol', 'is_active', 'password']
         extra_kwargs = {'password': {'write_only': True}}
 
+    # CORRECCIÓN 1: Validar que el NOMBRE DE USUARIO no tenga números
+    def validate_username(self, value):
+        # Usamos la función que ya tenemos para bloquear números y símbolos
+        return validar_solo_letras(value, "nombre de usuario")
+
+    def validate_first_name(self, value):
+        if value: return validar_solo_letras(value, "nombre")
+        return value
+
+    def validate_last_name(self, value):
+        if value: return validar_solo_letras(value, "apellido")
+        return value
+
+    # CORRECCIÓN 2: Ajustar roles permitidos para que coincidan con el Front
     def validate_rol(self, value):
-        roles_permitidos = ["Administrador", "Vendedor"]
-        # Capitalizamos la primera letra por si lo mandan en minúsculas (ej. "vendedor" -> "Vendedor")
-        rol_formateado = value.capitalize() 
+        # Ahora aceptamos "Admin" para que tu Frontend funcione perfectamente
+        roles_permitidos = ["Admin", "Vendedor", "Administrador"]
+        rol_formateado = value.capitalize() if value else ""
+        
+        # Si el front manda "Admin", lo normalizamos a "Admin"
+        if value == "Admin" or rol_formateado == "Admin":
+            return "Admin"
+            
         if rol_formateado not in roles_permitidos:
-            raise serializers.ValidationError(f"Rol inválido. Los roles permitidos son: {', '.join(roles_permitidos)}.")
+            raise serializers.ValidationError(f"Rol inválido. Use Admin o Vendedor.")
         return rol_formateado
 
     def validate_first_name(self, value):
